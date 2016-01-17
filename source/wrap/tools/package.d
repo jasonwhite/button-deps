@@ -3,6 +3,6 @@
  * License:   MIT
  * Authors:   Jason White
  */
-module wrap.tools;
+module deps.tools;
 
-public import wrap.tools.dmd;
+public import deps.tools.dmd;

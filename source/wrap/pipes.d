@@ -5,7 +5,7 @@
  *
  * Description:
  */
-module wrap.pipes;
+module deps.pipes;
 
 import io.file.stream : File, FileFlags;
 

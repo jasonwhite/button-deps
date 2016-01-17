@@ -3,9 +3,9 @@
  * License:   MIT
  * Authors:   Jason White
  */
-module wrap.tools.dmd;
+module deps.tools.dmd;
 
-import wrap.pipes;
+import deps.pipes;
 
 import io.file;
 

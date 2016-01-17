@@ -1,5 +1,5 @@
-name "bbwrap"
-description "Wraps commands to provide dependency information"
+name "bbdeps"
+description "Wraps commands to provide dependency information."
 copyright "Copyright © 2016, Jason White"
 authors "Jason White"
 

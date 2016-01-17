@@ -10,11 +10,11 @@
  *
  * TODO: Add option to override the tool.
  */
-module wrap.app;
+module deps.app;
 
 import std.algorithm : sort;
 
-import wrap.tools;
+import deps.tools;
 
 alias Tool = int function(string[]);
 
@@ -25,7 +25,7 @@ shared static this()
      * List of tools.
      */
     tools = [
-        "dmd": &wrap.tools.dmd.dmd,
+        "dmd": &deps.tools.dmd.dmd,
     ];
 }
 
@@ -43,7 +43,7 @@ else
 
         if (args.length <= 1)
         {
-            stderr.writeln("Usage: bb.wrap program [arg...]");
+            stderr.writeln("Usage: bbdeps program [arg...]");
             return 1;
         }
 
