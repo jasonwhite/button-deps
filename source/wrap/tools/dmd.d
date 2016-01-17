@@ -5,7 +5,7 @@
  */
 module deps.tools.dmd;
 
-import deps.pipes;
+import deps.logger;
 
 import io.file;
 
@@ -33,12 +33,12 @@ immutable(string)[] parseInputs(File f)
     return assumeUnique(inputs.data);
 }
 
-int dmd(string[] args)
+int dmd(DepsLogger logger, string[] args)
 {
     import std.process : wait, spawnProcess;
     import std.algorithm.iteration : filter, uniq;
     import std.algorithm.searching : startsWith;
-    import std.range : enumerate, empty;
+    import std.range : enumerate, empty, popFront, front;
     import std.file : remove;
     import std.array : array;
     import std.regex;
@@ -69,7 +69,7 @@ int dmd(string[] args)
     auto exitCode = wait(spawnProcess(args));
 
     foreach (input; File(depsPath).parseInputs.uniq)
-        sendInput(input);
+        logger.addInput(input);
 
     // Deduce outputs from the command line
     auto outputs = args.filter!(x => x.startsWith("-of")).array;
@@ -80,7 +80,7 @@ int dmd(string[] args)
     }
 
     if (!outputs.empty)
-        sendOutput(outputs[0]["-of".length .. $]);
+        logger.addOutput(outputs[0]["-of".length .. $]);
 
     return exitCode;
 }

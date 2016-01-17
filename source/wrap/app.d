@@ -14,9 +14,12 @@ module deps.app;
 
 import std.algorithm : sort;
 
+import deps.logger;
 import deps.tools;
 
-alias Tool = int function(string[]);
+import io;
+
+alias Tool = int function(DepsLogger, string[]);
 
 immutable Tool[string] tools;
 shared static this()
@@ -36,25 +39,58 @@ version (unittest)
 }
 else
 {
+    immutable usage = "Usage: bbdeps [--json FILE] -- program [arg...]";
+
     int main(string[] args)
     {
         import std.range : SortedRange;
-        import std.stdio;
+        import std.range : popFront, empty, front;
 
-        if (args.length <= 1)
+        args.popFront();
+
+        string json;
+
+        if (!args.empty && args.front == "--json")
         {
-            stderr.writeln("Usage: bbdeps program [arg...]");
+            args.popFront();
+            if (args.empty)
+            {
+                stderr.println(usage);
+                stderr.println("Error: Expected string for option '--json'");
+                return 1;
+            }
+
+            json = args.front;
+            args.popFront();
+        }
+
+        if (!args.empty && args.front == "--")
+            args.popFront();
+
+        if (args.empty)
+        {
+            stderr.println(usage);
             return 1;
         }
 
-        if (auto p = args[1] in tools)
+        DepsLogger logger;
+
+        if (json !is null)
+            logger = new JSONLogger(File(json, FileFlags.writeEmpty));
+        else
+            logger = new BrilliantBuildLogger();
+
+        scope (success) logger.finish();
+
+        if (auto p = args.front in tools)
         {
-            return (*p)(args[1 .. $]);
+            println(args);
+            return (*p)(logger, args);
         }
         else
         {
             // TODO: Fallback to using strace.
-            stderr.writeln("Error: Tool not supported.");
+            stderr.printfln("Error: Tool '%s' not supported", args.front);
             return 1;
         }
     }
