@@ -36,7 +36,7 @@ dependencies that `dmd -c foo.d` has. In this case, `bbdeps` will report
 
  1. Get the dependencies:
 
-     * [A D compiler][DMD]. Only DMD is ensured to work.
+     * [DMD][]. The standard D compiler.
      * [DUB][]: A package manager for D.
 
  2. Get the source:
@@ -50,6 +50,9 @@ dependencies that `dmd -c foo.d` has. In this case, `bbdeps` will report
     ```bash
     dub build
     ```
+
+[DMD]: http://dlang.org/download.html
+[DUB]: http://code.dlang.org/download
 
 ## License
 
