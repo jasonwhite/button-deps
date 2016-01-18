@@ -15,7 +15,7 @@ import io.file;
 immutable(string)[] parseInputs(File f)
 {
     import io.text : byLine;
-    import std.regex;
+    import std.regex : regex, matchAll;
     import std.array : appender;
     import std.algorithm.sorting : sort;
     import std.exception : assumeUnique;
@@ -41,7 +41,6 @@ int dmd(DepsLogger logger, string[] args)
     import std.range : enumerate, empty, popFront, front;
     import std.file : remove;
     import std.array : array;
-    import std.regex;
 
     import io.text, io.range;
 
