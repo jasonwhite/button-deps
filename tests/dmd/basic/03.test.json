@@ -1,0 +1,11 @@
+{
+    "command": ["dmd", "-c", "foo.d", "-op"],
+    "inputs": [
+        "foo.d",
+        "bar.d",
+        "baz.d"
+    ],
+    "outputs": [
+        "foo.d.o"
+    ]
+}
