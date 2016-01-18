@@ -84,7 +84,6 @@ else
 
         if (auto p = args.front in tools)
         {
-            println(args);
             return (*p)(logger, args);
         }
         else

@@ -60,9 +60,14 @@ int dmd(DepsLogger logger, string[] args)
     string depsPath;
 
     if (deps.empty)
+    {
         depsPath = tempFile(AutoDelete.no).path;
+        args ~= "-deps=" ~ depsPath;
+    }
     else
+    {
         depsPath = args[deps[0].index]["-deps=".length .. $];
+    }
 
     scope (exit) if (deps.length == 0) remove(depsPath);
 

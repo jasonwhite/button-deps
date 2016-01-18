@@ -97,7 +97,7 @@ class JSONLogger : DepsLogger
     {
         synchronized
         {
-            root["inputs"].array ~= JSONValue(path);
+            root["outputs"].array ~= JSONValue(path);
         }
     }
 }
