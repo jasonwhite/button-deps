@@ -75,6 +75,8 @@ Options parseArgs(const(string)[] args) pure
             opts.jsonFlag = true;
         else if (arg == "-op")
             opts.opFlag = true;
+        else if (arg == "-o-")
+            opts.suppressObjectsFlag = true;
         else if (arg == "-run")
         {
             args.popFront();
