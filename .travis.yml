@@ -4,7 +4,7 @@ d:
  - dmd
 
 before_install:
- - sudo apt-get install python
+ - sudo apt-get install python3.5
 
 script:
  - dub test --compiler=${DC}
