@@ -58,6 +58,18 @@ interface DepsLogger
     void addInput(string path);
     void addOutput(string path);
     void finish();
+
+    final void addInputs(const(string)[] paths)
+    {
+        foreach (path; paths)
+            addInput(path);
+    }
+
+    final void addOutputs(const(string)[] paths)
+    {
+        foreach (path; paths)
+            addOutput(path);
+    }
 }
 
 /**
