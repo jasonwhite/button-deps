@@ -24,11 +24,6 @@ class bcolors:
     UNDERLINE = '\033[4m'
     ERROR = FAIL + BOLD + 'Error' + END
 
-def results(f):
-    """Parses the given results file and returns the inputs and outputs."""
-    data = json.load(f)
-    return set(data['inputs']), set(data['outputs'])
-
 def test(bbdeps, path):
     """Runs a single test.
 
@@ -66,12 +61,18 @@ def test(bbdeps, path):
         print('       The following were not found in the results:')
         s = pprint.pformat(expected_inputs - result_inputs, width=1)
         print(textwrap.indent(s, '       '))
+        print('       Instead, these were found:')
+        s = pprint.pformat(result_inputs, width=1)
+        print(textwrap.indent(s, '       '))
         return False
 
     if not expected_outputs.issubset(result_outputs):
         print(bcolors.ERROR + ': Expected outputs are not a subset of the results')
         print('       The following were not found in the results:')
         s = pprint.pformat(expected_outputs - result_outputs, width=1)
+        print(textwrap.indent(s, '       '))
+        print('       Instead, these were found:')
+        s = pprint.pformat(result_outputs, width=1)
         print(textwrap.indent(s, '       '))
         return False
 
@@ -93,7 +94,7 @@ if __name__ == '__main__':
 
     os.remove('results.json')
 
-    print('Summary: {}/{} tests passed'.format(success, total))
+    print(':: Summary: {}/{} tests passed'.format(success, total))
 
     if success < total:
         sys.exit(1)
