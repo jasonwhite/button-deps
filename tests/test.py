@@ -24,6 +24,54 @@ class bcolors:
     UNDERLINE = '\033[4m'
     ERROR = FAIL + BOLD + 'Error' + END
 
+def check_positive(results, expected):
+    """Checks the results with the expected results."""
+
+    inputs  = (set(results['inputs']),  set(expected['inputs']))
+    outputs = (set(results['outputs']), set(expected['outputs']))
+
+    if not inputs[1].issubset(inputs[0]):
+        print(bcolors.ERROR + ': Expected inputs are not a subset of the results.')
+        print('       The following were not found in the results:')
+        s = pprint.pformat(inputs[1] - inputs[0], width=1)
+        print(textwrap.indent(s, '       '))
+        print('       Instead, these were found:')
+        s = pprint.pformat(inputs[0], width=1)
+        print(textwrap.indent(s, '       '))
+        return False
+
+    if not outputs[1].issubset(outputs[1]):
+        print(bcolors.ERROR + ': Expected outputs are not a subset of the results')
+        print('       The following were not found in the results:')
+        s = pprint.pformat(outputs[1] - outputs[1], width=1)
+        print(textwrap.indent(s, '       '))
+        print('       Instead, these were found:')
+        s = pprint.pformat(outputs[1], width=1)
+        print(textwrap.indent(s, '       '))
+        return False
+
+    return True
+
+def check_negative(results, expected):
+    """Checks the results with the expected results."""
+
+    inputs  = (set(results['inputs']),  set(expected['!inputs']))
+    outputs = (set(results['outputs']), set(expected['!outputs']))
+
+    if not inputs[1].isdisjoint(inputs[0]):
+        print(bcolors.ERROR + ': Found inputs that should not exist:')
+        s = pprint.pformat(inputs[1] & inputs[1], width=1)
+        print(textwrap.indent(s, '       '))
+        return False
+
+    if not outputs[1].isdisjoint(outputs[1]):
+        print(bcolors.ERROR + ': Found outputs that should not exist:')
+        s = pprint.pformat(outputs[1] & outputs[1], width=1)
+        print(textwrap.indent(s, '       '))
+        return False
+
+    return True
+
 def test(bbdeps, path):
     """Runs a single test.
 
@@ -35,48 +83,21 @@ def test(bbdeps, path):
 
     print(bcolors.HEADER + bcolors.BOLD + "Running test '{}'...".format(name) + bcolors.END)
 
-    t = None
+    testcase = None
     with open(path) as f:
-        t = json.load(f)
+        testcase = json.load(f)
 
-    args = [bbdeps, '--json', os.path.abspath('results.json'), '--'] + t['command']
+    args = [bbdeps, '--json', os.path.abspath('results.json'), '--'] + testcase['command']
 
     retcode = subprocess.call(args, cwd=dirname)
 
     if retcode != 0:
         return False
 
-    results = None
     with open('results.json') as f:
         results = json.load(f)
-
-    result_inputs = set(results['inputs'])
-    result_outputs = set(results['outputs'])
-
-    expected_inputs = set(t['inputs'])
-    expected_outputs = set(t['outputs'])
-
-    if not expected_inputs.issubset(result_inputs):
-        print(bcolors.ERROR + ': Expected inputs are not a subset of the results.')
-        print('       The following were not found in the results:')
-        s = pprint.pformat(expected_inputs - result_inputs, width=1)
-        print(textwrap.indent(s, '       '))
-        print('       Instead, these were found:')
-        s = pprint.pformat(result_inputs, width=1)
-        print(textwrap.indent(s, '       '))
-        return False
-
-    if not expected_outputs.issubset(result_outputs):
-        print(bcolors.ERROR + ': Expected outputs are not a subset of the results')
-        print('       The following were not found in the results:')
-        s = pprint.pformat(expected_outputs - result_outputs, width=1)
-        print(textwrap.indent(s, '       '))
-        print('       Instead, these were found:')
-        s = pprint.pformat(result_outputs, width=1)
-        print(textwrap.indent(s, '       '))
-        return False
-
-    return True
+        return check_positive(results, testcase) and \
+               check_negative(results, testcase)
 
 if __name__ == '__main__':
     script_dir = os.path.dirname(os.path.realpath(__file__))

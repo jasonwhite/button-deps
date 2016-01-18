@@ -8,5 +8,9 @@
     "outputs": [
         "foo",
         "foo.o"
+    ],
+    "!inputs": [
+    ],
+    "!outputs": [
     ]
 }

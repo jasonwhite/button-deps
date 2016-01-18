@@ -1,12 +1,12 @@
 {
-    "command": ["dmd", "-c", "foo.d", "-op"],
+    "command": ["dmd", "-lib", "bar.d", "foo.d"],
     "inputs": [
         "foo.d",
         "bar.d",
         "baz.d"
     ],
     "outputs": [
-        "foo.d.o"
+        "bar.a"
     ],
     "!inputs": [
     ],

@@ -1,15 +1,17 @@
 {
-    "command": ["dmd", "-c", "foo.d", "-op"],
+    "command": ["dmd", "foo.d", "bar.d", "-o-"],
     "inputs": [
         "foo.d",
         "bar.d",
         "baz.d"
     ],
     "outputs": [
-        "foo.d.o"
+        "foo"
     ],
     "!inputs": [
     ],
     "!outputs": [
+        "foo.o",
+        "bar.o"
     ]
 }

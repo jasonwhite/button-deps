@@ -9,5 +9,9 @@
         "bar",
         "foo.o",
         "bar.o"
+    ],
+    "!inputs": [
+    ],
+    "!outputs": [
     ]
 }

@@ -7,5 +7,9 @@
     ],
     "outputs": [
         "foo.o"
+    ],
+    "!inputs": [
+    ],
+    "!outputs": [
     ]
 }
