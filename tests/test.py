@@ -10,6 +10,7 @@ import sys
 import json
 import glob
 import pprint
+import fnmatch
 import textwrap
 import subprocess
 
@@ -64,7 +65,7 @@ def check_negative(results, expected):
         print(textwrap.indent(s, '       '))
         return False
 
-    if not outputs[1].isdisjoint(outputs[1]):
+    if not outputs[1].isdisjoint(outputs[0]):
         print(bcolors.ERROR + ': Found outputs that should not exist:')
         s = pprint.pformat(outputs[1] & outputs[1], width=1)
         print(textwrap.indent(s, '       '))
@@ -94,15 +95,30 @@ def test(bbdeps, path):
     if retcode != 0:
         return False
 
+    results = None
     with open('results.json') as f:
         results = json.load(f)
-        return check_positive(results, testcase) and \
-               check_negative(results, testcase)
+
+    success = check_positive(results, testcase) and \
+              check_negative(results, testcase)
+
+    if not success:
+        print("These dependencies were reported:")
+        pprint.pprint(results)
+
+    return success
+
+def find_tests(top='.'):
+    for root, dirs, files in os.walk(top):
+        for f in files:
+            if fnmatch.fnmatch(f, 'test.*.json'):
+                yield os.path.join(root, f)
 
 if __name__ == '__main__':
     script_dir = os.path.dirname(os.path.realpath(__file__))
     os.chdir(script_dir)
-    tests = glob.glob('*/**/test.*.json', recursive=True)
+
+    tests = find_tests()
 
     bbdeps = os.path.abspath('../bbdeps')
 
