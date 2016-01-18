@@ -1,12 +1,12 @@
 {
-    "command": ["dmd", "-lib", "bar.d", "foo.d"],
+    "command": ["dmd", "-lib", "foo.d", "bar.d", "-odobj", "-offoobar.asdf"],
     "inputs": [
         "foo.d",
         "bar.d",
         "baz.d"
     ],
     "outputs": [
-        "bar.a"
+        "obj/foobar.asdf"
     ],
     "!inputs": [
     ],

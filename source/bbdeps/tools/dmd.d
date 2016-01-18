@@ -132,7 +132,7 @@ string objectPath(const ref Options opts, string sourceFile)
 }
 
 /**
- * Returns the static library file path for the given source file path.
+ * Returns the static library file path.
  */
 string staticLibraryPath(const ref Options opts)
 {
@@ -162,7 +162,29 @@ string staticLibraryPath(const ref Options opts)
 }
 
 /**
- * Returns the static library file path for the given source file path.
+ * Returns the shared library file path.
+ */
+string sharedLibraryPath(const ref Options opts)
+{
+    import std.algorithm.iteration : filter;
+    import std.algorithm.searching : endsWith;
+
+    string outputFile;
+
+    if (opts.outputFile)
+        return opts.outputFile;
+
+    // If no output file is specified with -of, the output file is based on
+    // the name of the first source file.
+    auto dSources = opts.files.filter!(p => p.endsWith(".d"));
+    if (dSources.empty)
+        return null;
+
+    return setExtension(dSources.front, ".so");
+}
+
+/**
+ * Returns the static library file path.
  */
 string executablePath(const ref Options opts)
 {
@@ -261,13 +283,9 @@ int dmd(DepsLogger logger, string[] args)
         if (auto path = staticLibraryPath(opts))
             logger.addOutput(path);
     }
-    else if (opts.sharedFlag)
-    {
-        // TODO
-    }
     else if (opts.compileFlag)
     {
-        // Generates an object file only. Multiple source files are put into a
+        // Compiles object files only. Multiple source files are put into a
         // single object file if "-of" is specified.
         if (!opts.suppressObjectsFlag)
         {
@@ -282,6 +300,22 @@ int dmd(DepsLogger logger, string[] args)
                     .array()
                     );
             }
+        }
+    }
+    else if (opts.sharedFlag)
+    {
+        // Generates a binary executable.
+        if (auto path = sharedLibraryPath(opts))
+            logger.addOutput(path);
+
+        if (!opts.suppressObjectsFlag)
+        {
+            logger.addOutputs(
+                opts.files
+                .filter!(p => p.endsWith(".d"))
+                .map!(p => objectPath(opts, p))
+                .array()
+                );
         }
     }
     else

@@ -41,13 +41,13 @@ def check_positive(results, expected):
         print(textwrap.indent(s, '       '))
         return False
 
-    if not outputs[1].issubset(outputs[1]):
+    if not outputs[1].issubset(outputs[0]):
         print(bcolors.ERROR + ': Expected outputs are not a subset of the results')
         print('       The following were not found in the results:')
-        s = pprint.pformat(outputs[1] - outputs[1], width=1)
+        s = pprint.pformat(outputs[1] - outputs[0], width=1)
         print(textwrap.indent(s, '       '))
         print('       Instead, these were found:')
-        s = pprint.pformat(outputs[1], width=1)
+        s = pprint.pformat(outputs[0], width=1)
         print(textwrap.indent(s, '       '))
         return False
 

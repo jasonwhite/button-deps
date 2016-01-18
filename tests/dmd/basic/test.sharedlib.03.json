@@ -1,0 +1,20 @@
+{
+    "command": [
+        "dmd", "-shared", "-defaultlib=libphobos2.so", "-fPIC", "foo.d",
+        "bar.d", "-offoobar.so"
+    ],
+    "inputs": [
+        "foo.d",
+        "bar.d",
+        "baz.d"
+    ],
+    "outputs": [
+        "foobar.so",
+        "foo.o",
+        "bar.o"
+    ],
+    "!inputs": [
+    ],
+    "!outputs": [
+    ]
+}
