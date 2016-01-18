@@ -131,7 +131,8 @@ if __name__ == '__main__':
 
     os.remove('results.json')
 
-    print(':: Summary: {}/{} tests passed'.format(success, total))
+    print(':: Summary: {}/{} ({:.0%}) tests passed'
+            .format(success, total, success/total))
 
     if success < total:
         sys.exit(1)
