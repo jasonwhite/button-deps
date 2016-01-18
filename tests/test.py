@@ -81,7 +81,7 @@ def test(bbdeps, path):
 if __name__ == '__main__':
     script_dir = os.path.dirname(os.path.realpath(__file__))
     os.chdir(script_dir)
-    tests = glob.glob('*/**/*.test.json', recursive=True)
+    tests = glob.glob('*/**/test.*.json', recursive=True)
 
     bbdeps = os.path.abspath('../bbdeps')
 
