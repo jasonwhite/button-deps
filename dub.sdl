@@ -1,6 +1,7 @@
 name "bbdeps"
 description "Wraps commands to provide dependency information."
 copyright "Copyright © 2016, Jason White"
+license "MIT"
 authors "Jason White"
 
 dependency "io" version=">=0.0.1"
