@@ -1,6 +1,12 @@
-sudo: false
-
 language: d
 
 d:
  - dmd
+
+before_install:
+ - sudo apt-get install python
+
+script:
+ - dub test --compiler=${DC}
+ - dub build --compiler=${DC}
+ - ./tests/test.py
