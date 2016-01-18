@@ -5,9 +5,181 @@
  */
 module deps.tools.dmd;
 
+import std.path;
+
+import deps.tools.args;
 import deps.logger;
 
 import io.file;
+
+struct Options
+{
+    bool compileFlag; // -c
+    bool coverageFlag; // -cov
+    bool libFlag; // -lib
+    bool sharedFlag; // -shared
+    bool docFlag; // -D
+    bool headerFlag; // -H
+    bool mapFlag; // -map
+    bool suppressObjectsFlag; // -o-
+    bool jsonFlag; // -X
+    bool opFlag; // -op
+
+    string outputDir; // -od
+    string outputFile; // -of
+    string depsFile; // -deps=
+    string docDir; // -Dd
+    string docFile; // -Df
+    string headerDir; // -Hd
+    string headerFile; // -Hf
+    string[] importDirs; // -I
+    string[] stringImportDirs; // -J
+    string[] linkerFlags; // -L
+    const(string)[] run; // -run
+    string jsonFile; // -Xf
+    string cmdFile; // @cmdfile
+
+    string[] files; // Extra files.
+}
+
+/**
+ * Parses DMD arguments.
+ */
+Options parseArgs(const(string)[] args) pure
+{
+    import std.algorithm.searching : startsWith;
+    import std.exception : enforce;
+    import std.range : front, popFront, empty;
+
+    Options opts;
+
+    while (!args.empty)
+    {
+        string arg = args.front;
+
+        if (arg == "-c")
+            opts.compileFlag = true;
+        else if (arg == "-cov")
+            opts.coverageFlag = true;
+        else if (arg == "-lib")
+            opts.libFlag = true;
+        else if (arg == "-shared")
+            opts.sharedFlag = true;
+        else if (arg == "-lib")
+            opts.docFlag = true;
+        else if (arg == "-H")
+            opts.headerFlag = true;
+        else if (arg == "-map")
+            opts.mapFlag = true;
+        else if (arg == "-X")
+            opts.jsonFlag = true;
+        else if (arg == "-op")
+            opts.opFlag = true;
+        else if (arg == "-run")
+        {
+            args.popFront();
+            opts.run = args;
+            break;
+        }
+        else if (arg.startsWith("-deps="))
+        {
+            enforce!ArgParseException(!opts.depsFile,
+                    "-deps[=FILE] can only be specified once");
+            opts.depsFile = arg["-deps=".length .. $];
+        }
+        else if (arg.startsWith("-od"))
+            opts.outputDir = arg["-od".length .. $];
+        else if (arg.startsWith("-of"))
+            opts.outputFile = arg["-of".length .. $];
+        else if (arg.startsWith("-Xf"))
+            opts.jsonFile = arg["-Xf".length .. $];
+        else if (arg.startsWith("-Dd"))
+            opts.docDir = arg["-Dd".length .. $];
+        else if (arg.startsWith("-Df"))
+            opts.docFile = arg["-Df".length .. $];
+        else if (arg.startsWith("-Hd"))
+            opts.headerDir = arg["-Hd".length .. $];
+        else if (arg.startsWith("-Hf"))
+            opts.headerFile = arg["-Hf".length .. $];
+        else if (arg.startsWith("-I"))
+            opts.importDirs ~= arg["-I".length .. $];
+        else if (arg.startsWith("-J"))
+            opts.stringImportDirs ~= arg["-J".length .. $];
+        else if (arg.startsWith("-L"))
+            opts.stringImportDirs ~= arg["-L".length .. $];
+        else if (arg.startsWith("@"))
+            opts.cmdFile = arg["@".length .. $];
+        else if (!arg.startsWith("-"))
+            opts.files ~= arg;
+
+        args.popFront();
+    }
+
+    return opts;
+}
+
+/**
+ * Returns the object file path for the given source file path.
+ */
+string objectPath(const ref Options opts, string sourceFile)
+{
+    if (opts.opFlag)
+        return buildPath(opts.outputDir, sourceFile ~ ".o");
+    else
+        return buildPath(opts.outputDir, setExtension(sourceFile, ".o"));
+}
+
+/**
+ * Returns the static library file path for the given source file path.
+ */
+string staticLibraryPath(const ref Options opts)
+{
+    import std.algorithm.iteration : filter;
+    import std.algorithm.searching : endsWith;
+
+    // If the output file has no extension, ".a" is appended.
+
+    // Note that -op and -o- have no effect when building static libraries.
+
+    string outputFile;
+
+    if (opts.outputFile)
+        outputFile = defaultExtension(opts.outputFile, ".a");
+    else
+    {
+        // If no output file is specified with -of, the output file is based on
+        // the name of the first source file.
+        auto dSources = opts.files.filter!(p => p.endsWith(".d"));
+        if (dSources.empty)
+            return null;
+
+        outputFile = setExtension(dSources.front, ".a");
+    }
+
+    return buildPath(opts.outputDir, outputFile);
+}
+
+/**
+ * Returns the static library file path for the given source file path.
+ */
+string executablePath(const ref Options opts)
+{
+    import std.algorithm.iteration : filter;
+    import std.algorithm.searching : endsWith;
+
+    string outputFile;
+
+    if (opts.outputFile)
+        return opts.outputFile;
+
+    // If no output file is specified with -of, the output file is based on
+    // the name of the first source file.
+    auto dSources = opts.files.filter!(p => p.endsWith(".d"));
+    if (dSources.empty)
+        return null;
+
+    return stripExtension(dSources.front);
+}
 
 /**
  * Parses the given file for dependencies. Returns a sorted list of inputs.
@@ -36,55 +208,96 @@ immutable(string)[] parseInputs(File f)
 int dmd(DepsLogger logger, string[] args)
 {
     import std.process : wait, spawnProcess;
-    import std.algorithm.iteration : filter, uniq;
-    import std.algorithm.searching : startsWith;
+    import std.algorithm.iteration : map, filter, uniq;
+    import std.algorithm.searching : endsWith;
     import std.range : enumerate, empty, popFront, front;
     import std.file : remove;
     import std.array : array;
 
     import io.text, io.range;
 
-    // Check for existing '-deps' options.
-    auto deps = args
-            .enumerate
-            .filter!(x => x.value.startsWith("-deps="))
-            .array;
-
-    if (deps.length > 1)
-    {
-        stderr.println("Error: Found multiple '-deps' options.");
-        return 1;
-    }
+    Options opts = parseArgs(args[1 .. $]);
 
     string depsPath;
 
-    if (deps.empty)
+    if (opts.depsFile is null)
     {
+        // Output -deps to a temporary file.
         depsPath = tempFile(AutoDelete.no).path;
         args ~= "-deps=" ~ depsPath;
     }
     else
     {
-        depsPath = args[deps[0].index]["-deps=".length .. $];
+        // -deps= was specified already. Just use this path to get the
+        // dependencies.
+        depsPath = opts.depsFile;
     }
 
-    scope (exit) if (deps.length == 0) remove(depsPath);
+    // Delete the temporary -deps file when done.
+    scope (exit) if (opts.depsFile is null) remove(depsPath);
 
     auto exitCode = wait(spawnProcess(args));
+
+    if (exitCode != 0)
+    {
+        // If the compilation failed, don't bother trying to figure out implicit
+        // dependencies. They will be ignored by the build system anyway.
+        return exitCode;
+    }
 
     foreach (input; File(depsPath).parseInputs.uniq)
         logger.addInput(input);
 
-    // Deduce outputs from the command line
-    auto outputs = args.filter!(x => x.startsWith("-of")).array;
-    if (outputs.length > 1)
+    foreach (file; opts.files)
+        logger.addInput(file);
+
+    // Determine the output files based on command line options. If no output
+    // file name is specified with -of, the file name is based on the first
+    // source file specified on the command line.
+    if (opts.libFlag)
     {
-        stderr.println("Error: Found multiple '-of' options.");
-        return 1;
+        if (auto path = staticLibraryPath(opts))
+            logger.addOutput(path);
+    }
+    else if (opts.sharedFlag)
+    {
+        // TODO
+    }
+    else if (opts.compileFlag)
+    {
+        // Generates an object file only. Multiple source files are put into a
+        // single object file if "-of" is specified.
+        if (!opts.suppressObjectsFlag)
+        {
+            if (opts.outputFile)
+                logger.addOutput(opts.outputFile);
+            else
+            {
+                logger.addOutputs(
+                    opts.files
+                    .filter!(p => p.endsWith(".d"))
+                    .map!(p => objectPath(opts, p))
+                    .array()
+                    );
+            }
+        }
+    }
+    else
+    {
+        // Generates a binary executable.
+        if (auto path = executablePath(opts))
+            logger.addOutput(path);
+
+        if (!opts.suppressObjectsFlag)
+        {
+            logger.addOutputs(
+                opts.files
+                .filter!(p => p.endsWith(".d"))
+                .map!(p => objectPath(opts, p))
+                .array()
+                );
+        }
     }
 
-    if (!outputs.empty)
-        logger.addOutput(outputs[0]["-of".length .. $]);
-
-    return exitCode;
+    return 0;
 }
