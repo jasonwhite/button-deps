@@ -14,6 +14,7 @@ import io.file;
 
 struct Options
 {
+    // Flags
     bool compileFlag; // -c
     bool coverageFlag; // -cov
     bool libFlag; // -lib
@@ -25,6 +26,7 @@ struct Options
     bool jsonFlag; // -X
     bool opFlag; // -op
 
+    // Options with arguments
     string outputDir; // -od
     string outputFile; // -of
     string depsFile; // -deps=
@@ -39,7 +41,104 @@ struct Options
     string jsonFile; // -Xf
     string cmdFile; // @cmdfile
 
-    string[] files; // Extra files.
+    // Left over files on the command line
+    string[] files;
+
+    /**
+     * Returns the object file path for the given source file path.
+     */
+    string objectPath(string sourceFile) const pure
+    {
+        if (opFlag)
+            return buildPath(outputDir, sourceFile ~ ".o");
+        else
+            return buildPath(outputDir, setExtension(sourceFile, ".o"));
+    }
+
+    /**
+     * Returns a list of object file paths.
+     */
+    string[] objectPaths() const pure
+    {
+        import std.algorithm.iteration : map, filter;
+        import std.algorithm.searching : endsWith;
+        import std.array : array;
+
+        return files
+            .filter!(p => p.endsWith(".d"))
+            .map!(p => objectPath(p))
+            .array();
+    }
+
+    /**
+     * Returns the static library file path.
+     */
+    string staticLibraryPath() const pure
+    {
+        import std.algorithm.iteration : filter;
+        import std.algorithm.searching : endsWith;
+
+        // If the output file has no extension, ".a" is appended.
+
+        // Note that -op and -o- have no effect when building static libraries.
+
+        string path;
+
+        if (outputFile)
+            path = defaultExtension(outputFile, ".a");
+        else
+        {
+            // If no output file is specified with -of, the output file is based on
+            // the name of the first source file.
+            auto dSources = files.filter!(p => p.endsWith(".d"));
+            if (dSources.empty)
+                return null;
+
+            path = setExtension(dSources.front, ".a");
+        }
+
+        return buildPath(outputDir, path);
+    }
+
+    /**
+     * Returns the shared library file path.
+     */
+    string sharedLibraryPath() const pure
+    {
+        import std.algorithm.iteration : filter;
+        import std.algorithm.searching : endsWith;
+
+        if (outputFile)
+            return outputFile;
+
+        // If no output file is specified with -of, the output file is based on
+        // the name of the first source file.
+        auto dSources = files.filter!(p => p.endsWith(".d"));
+        if (dSources.empty)
+            return null;
+
+        return setExtension(dSources.front, ".so");
+    }
+
+    /**
+     * Returns the static library file path.
+     */
+    string executablePath() const pure
+    {
+        import std.algorithm.iteration : filter;
+        import std.algorithm.searching : endsWith;
+
+        if (outputFile)
+            return outputFile;
+
+        // If no output file is specified with -of, the output file is based on
+        // the name of the first source file.
+        auto dSources = files.filter!(p => p.endsWith(".d"));
+        if (dSources.empty)
+            return null;
+
+        return stripExtension(dSources.front);
+    }
 }
 
 /**
@@ -121,91 +220,6 @@ Options parseArgs(const(string)[] args) pure
 }
 
 /**
- * Returns the object file path for the given source file path.
- */
-string objectPath(const ref Options opts, string sourceFile)
-{
-    if (opts.opFlag)
-        return buildPath(opts.outputDir, sourceFile ~ ".o");
-    else
-        return buildPath(opts.outputDir, setExtension(sourceFile, ".o"));
-}
-
-/**
- * Returns the static library file path.
- */
-string staticLibraryPath(const ref Options opts)
-{
-    import std.algorithm.iteration : filter;
-    import std.algorithm.searching : endsWith;
-
-    // If the output file has no extension, ".a" is appended.
-
-    // Note that -op and -o- have no effect when building static libraries.
-
-    string outputFile;
-
-    if (opts.outputFile)
-        outputFile = defaultExtension(opts.outputFile, ".a");
-    else
-    {
-        // If no output file is specified with -of, the output file is based on
-        // the name of the first source file.
-        auto dSources = opts.files.filter!(p => p.endsWith(".d"));
-        if (dSources.empty)
-            return null;
-
-        outputFile = setExtension(dSources.front, ".a");
-    }
-
-    return buildPath(opts.outputDir, outputFile);
-}
-
-/**
- * Returns the shared library file path.
- */
-string sharedLibraryPath(const ref Options opts)
-{
-    import std.algorithm.iteration : filter;
-    import std.algorithm.searching : endsWith;
-
-    string outputFile;
-
-    if (opts.outputFile)
-        return opts.outputFile;
-
-    // If no output file is specified with -of, the output file is based on
-    // the name of the first source file.
-    auto dSources = opts.files.filter!(p => p.endsWith(".d"));
-    if (dSources.empty)
-        return null;
-
-    return setExtension(dSources.front, ".so");
-}
-
-/**
- * Returns the static library file path.
- */
-string executablePath(const ref Options opts)
-{
-    import std.algorithm.iteration : filter;
-    import std.algorithm.searching : endsWith;
-
-    string outputFile;
-
-    if (opts.outputFile)
-        return opts.outputFile;
-
-    // If no output file is specified with -of, the output file is based on
-    // the name of the first source file.
-    auto dSources = opts.files.filter!(p => p.endsWith(".d"));
-    if (dSources.empty)
-        return null;
-
-    return stripExtension(dSources.front);
-}
-
-/**
  * Parses the given file for dependencies. Returns a sorted list of inputs.
  */
 immutable(string)[] parseInputs(File f)
@@ -280,7 +294,7 @@ int dmd(DepsLogger logger, string[] args)
     // source file specified on the command line.
     if (opts.libFlag)
     {
-        if (auto path = staticLibraryPath(opts))
+        if (auto path = opts.staticLibraryPath())
             logger.addOutput(path);
     }
     else if (opts.compileFlag)
@@ -292,47 +306,26 @@ int dmd(DepsLogger logger, string[] args)
             if (opts.outputFile)
                 logger.addOutput(opts.outputFile);
             else
-            {
-                logger.addOutputs(
-                    opts.files
-                    .filter!(p => p.endsWith(".d"))
-                    .map!(p => objectPath(opts, p))
-                    .array()
-                    );
-            }
+                logger.addOutputs(opts.objectPaths());
         }
     }
     else if (opts.sharedFlag)
     {
         // Generates a binary executable.
-        if (auto path = sharedLibraryPath(opts))
+        if (auto path = opts.sharedLibraryPath())
             logger.addOutput(path);
 
         if (!opts.suppressObjectsFlag)
-        {
-            logger.addOutputs(
-                opts.files
-                .filter!(p => p.endsWith(".d"))
-                .map!(p => objectPath(opts, p))
-                .array()
-                );
-        }
+            logger.addOutputs(opts.objectPaths());
     }
     else
     {
         // Generates a binary executable.
-        if (auto path = executablePath(opts))
+        if (auto path = opts.executablePath())
             logger.addOutput(path);
 
         if (!opts.suppressObjectsFlag)
-        {
-            logger.addOutputs(
-                opts.files
-                .filter!(p => p.endsWith(".d"))
-                .map!(p => objectPath(opts, p))
-                .array()
-                );
-        }
+            logger.addOutputs(opts.objectPaths());
     }
 
     return 0;
