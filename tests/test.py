@@ -16,7 +16,7 @@ import subprocess
 
 class bcolors:
     HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
+    BLUE = '\033[94m'
     OKGREEN = '\033[92m'
     WARNING = '\033[93m'
     FAIL = '\033[91m'
@@ -73,6 +73,26 @@ def check_negative(results, expected):
 
     return True
 
+def check_exist(dirname, outputs):
+    """Checks that the output files exist."""
+    missing = [p for p in (os.path.join(dirname, p) for p in outputs)
+                if not os.path.exists(p)]
+
+    if missing:
+        print(bcolors.ERROR + ': Result outputs missing from file system:')
+        pprint.pprint(missing)
+        return False
+
+    return True
+
+def cleanup(dirname, outputs):
+    """Deletes the expected outputs."""
+    for output in outputs:
+        try:
+            os.remove(os.path.join(dirname, output))
+        except OSError:
+            pass
+
 def test(bbdeps, path):
     """Runs a single test.
 
@@ -82,7 +102,7 @@ def test(bbdeps, path):
 
     name, _ = os.path.splitext(path)
 
-    print(bcolors.HEADER + bcolors.BOLD + "Running test '{}'...".format(name) + bcolors.END)
+    print(bcolors.HEADER + ":: Test '{}'...".format(name) + bcolors.END)
 
     testcase = None
     with open(path) as f:
@@ -90,9 +110,11 @@ def test(bbdeps, path):
 
     args = [bbdeps, '--json', os.path.abspath('results.json'), '--'] + testcase['command']
 
-    retcode = subprocess.call(args, cwd=dirname)
-
-    if retcode != 0:
+    output = None
+    try:
+        output = subprocess.check_output(args, cwd=dirname)
+    except subprocess.CalledProcessError as e:
+        print(e.output)
         return False
 
     results = None
@@ -102,9 +124,13 @@ def test(bbdeps, path):
     success = check_positive(results, testcase) and \
               check_negative(results, testcase)
 
-    if not success:
+    if success:
+        success = check_exist(dirname, results['outputs'])
+    else:
         print("These dependencies were reported:")
         pprint.pprint(results)
+
+    cleanup(dirname, results['outputs'])
 
     return success
 
@@ -128,11 +154,15 @@ if __name__ == '__main__':
         total += 1
         if test(bbdeps, t):
             success += 1
+        else:
+            print(bcolors.FAIL + bcolors.BOLD + ' - TEST FAILED' + bcolors.END)
 
     os.remove('results.json')
 
-    print(':: Summary: {}/{} ({:.0%}) tests passed'
-            .format(success, total, success/total))
+    color = bcolors.OKGREEN if success == total else bcolors.FAIL
+
+    print(color + bcolors.BOLD + ':: Summary: {}/{} ({:.0%}) tests passed'
+            .format(success, total, success/total) + bcolors.END)
 
     if success < total:
         sys.exit(1)
