@@ -49,6 +49,8 @@ struct Options
      */
     string objectPath(string sourceFile) const pure
     {
+        if (!opFlag)
+            sourceFile = baseName(sourceFile);
         return buildPath(outputDir, setExtension(sourceFile, ".o"));
     }
 
@@ -114,7 +116,7 @@ struct Options
             if (dSources.empty)
                 return null;
 
-            path = setExtension(dSources.front, ".a");
+            path = setExtension(baseName(dSources.front), ".a");
         }
 
         return buildPath(outputDir, path);
@@ -137,7 +139,7 @@ struct Options
         if (dSources.empty)
             return null;
 
-        return setExtension(dSources.front, ".so");
+        return setExtension(baseName(dSources.front), ".so");
     }
 
     /**
@@ -157,7 +159,7 @@ struct Options
         if (dSources.empty)
             return null;
 
-        return stripExtension(dSources.front);
+        return stripExtension(baseName(dSources.front));
     }
 }
 
