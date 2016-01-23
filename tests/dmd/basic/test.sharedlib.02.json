@@ -1,12 +1,12 @@
 {
     "command": [
-        "dmd", "-shared", "-defaultlib=libphobos2.so", "-fPIC", "foo.d",
-        "bar.d", "-offoobar"
+        "dmd", "-Isrc", "-shared", "-defaultlib=libphobos2.so", "-fPIC",
+        "src/foo.d", "src/bar.d", "-offoobar"
     ],
     "inputs": [
-        "foo.d",
-        "bar.d",
-        "baz.d"
+        "src/foo.d",
+        "src/bar.d",
+        "src/baz.d"
     ],
     "outputs": [
         "foobar",

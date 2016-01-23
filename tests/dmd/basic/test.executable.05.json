@@ -1,13 +1,13 @@
 {
-    "command": ["dmd", "foo.d", "bar.d", "-odobj", "-op"],
+    "command": ["dmd", "-Isrc", "src/foo.d", "src/bar.d", "-odobj", "-op"],
     "inputs": [
-        "foo.d",
-        "bar.d",
-        "baz.d"
+        "src/foo.d",
+        "src/bar.d",
+        "src/baz.d"
     ],
     "outputs": [
         "foo",
-        "obj/foo.o"
+        "obj/src/foo.o"
     ],
     "!inputs": [
     ],

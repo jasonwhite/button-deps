@@ -1,9 +1,9 @@
 {
-    "command": ["dmd", "foo.d", "bar.d", "-odobj"],
+    "command": ["dmd", "-Isrc", "src/foo.d", "src/bar.d", "-odobj"],
     "inputs": [
-        "foo.d",
-        "bar.d",
-        "baz.d"
+        "src/foo.d",
+        "src/bar.d",
+        "src/baz.d"
     ],
     "outputs": [
         "foo",
@@ -13,6 +13,7 @@
     ],
     "!outputs": [
         "foo.o",
-        "bar.o"
+        "bar.o",
+        "src/bar.o"
     ]
 }

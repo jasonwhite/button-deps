@@ -1,9 +1,9 @@
 {
-    "command": ["dmd", "-lib", "foo.d", "bar.d", "-offoobar.asdf"],
+    "command": ["dmd", "-Isrc", "-lib", "src/foo.d", "src/bar.d", "-offoobar.asdf"],
     "inputs": [
-        "foo.d",
-        "bar.d",
-        "baz.d"
+        "src/foo.d",
+        "src/bar.d",
+        "src/baz.d"
     ],
     "outputs": [
         "foobar.asdf"

@@ -1,9 +1,9 @@
 {
-    "command": ["dmd", "-c", "foo.d"],
+    "command": ["dmd", "-Isrc", "-c", "src/foo.d"],
     "inputs": [
-        "foo.d",
-        "bar.d",
-        "baz.d"
+        "src/foo.d",
+        "src/bar.d",
+        "src/baz.d"
     ],
     "outputs": [
         "foo.o"
@@ -11,5 +11,6 @@
     "!inputs": [
     ],
     "!outputs": [
+        "src/foo.o"
     ]
 }
