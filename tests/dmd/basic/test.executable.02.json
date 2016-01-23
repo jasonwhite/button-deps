@@ -7,7 +7,6 @@
     ],
     "outputs": [
         "bar",
-        "foo.o",
         "bar.o"
     ],
     "!inputs": [

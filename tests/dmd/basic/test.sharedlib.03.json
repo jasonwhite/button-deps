@@ -10,11 +10,11 @@
     ],
     "outputs": [
         "foobar.so",
-        "foo.o",
-        "bar.o"
+        "foobar.o"
     ],
     "!inputs": [
     ],
     "!outputs": [
+        "bar.o"
     ]
 }

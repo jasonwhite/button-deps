@@ -7,13 +7,13 @@
     ],
     "outputs": [
         "foo",
-        "obj/foo.d.o",
-        "obj/bar.d.o"
+        "obj/foo.o"
     ],
     "!inputs": [
     ],
     "!outputs": [
         "foo.o",
-        "bar.o"
+        "bar.o",
+        "obj/bar.o"
     ]
 }

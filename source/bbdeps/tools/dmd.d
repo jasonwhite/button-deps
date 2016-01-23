@@ -49,10 +49,7 @@ struct Options
      */
     string objectPath(string sourceFile) const pure
     {
-        if (opFlag)
-            return buildPath(outputDir, sourceFile ~ ".o");
-        else
-            return buildPath(outputDir, setExtension(sourceFile, ".o"));
+        return buildPath(outputDir, setExtension(sourceFile, ".o"));
     }
 
     /**
@@ -64,10 +61,33 @@ struct Options
         import std.algorithm.searching : endsWith;
         import std.array : array;
 
-        return files
-            .filter!(p => p.endsWith(".d"))
-            .map!(p => objectPath(p))
-            .array();
+        if (suppressObjectsFlag)
+            return [];
+
+        // If -c is specified, all source files are compiled into separate
+        // object files. If -c is not specified, all sources files are compiled
+        // into a single object file which is named based on the first source
+        // file specified.
+        if (compileFlag)
+        {
+            if (outputFile)
+                return [outputFile];
+            else
+                return files
+                    .filter!(p => p.endsWith(".d"))
+                    .map!(p => objectPath(p))
+                    .array();
+        }
+
+        // Object name is based on -of
+        if (outputFile)
+            return [objectPath(outputFile)];
+
+        auto dSources = files.filter!(p => p.endsWith(".d"));
+        if (dSources.empty)
+            return [];
+
+        return [objectPath(dSources.front)];
     }
 
     /**
@@ -299,33 +319,25 @@ int dmd(DepsLogger logger, string[] args)
     }
     else if (opts.compileFlag)
     {
-        // Compiles object files only. Multiple source files are put into a
-        // single object file if "-of" is specified.
-        if (!opts.suppressObjectsFlag)
-        {
-            if (opts.outputFile)
-                logger.addOutput(opts.outputFile);
-            else
-                logger.addOutputs(opts.objectPaths());
-        }
+        logger.addOutputs(opts.objectPaths());
     }
     else if (opts.sharedFlag)
     {
-        // Generates a binary executable.
         if (auto path = opts.sharedLibraryPath())
             logger.addOutput(path);
 
-        if (!opts.suppressObjectsFlag)
-            logger.addOutputs(opts.objectPaths());
+        logger.addOutputs(opts.objectPaths());
     }
     else
     {
-        // Generates a binary executable.
-        if (auto path = opts.executablePath())
-            logger.addOutput(path);
-
         if (!opts.suppressObjectsFlag)
+        {
+            // Binary executable.
+            if (auto path = opts.executablePath())
+                logger.addOutput(path);
+
             logger.addOutputs(opts.objectPaths());
+        }
     }
 
     return 0;

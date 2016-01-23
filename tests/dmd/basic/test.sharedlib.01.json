@@ -9,11 +9,11 @@
     ],
     "outputs": [
         "foo.so",
-        "foo.o",
-        "bar.o"
+        "foo.o"
     ],
     "!inputs": [
     ],
     "!outputs": [
+        "bar.o"
     ]
 }

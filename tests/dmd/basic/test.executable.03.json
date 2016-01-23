@@ -6,11 +6,11 @@
         "baz.d"
     ],
     "outputs": [
-        "foo"
     ],
     "!inputs": [
     ],
     "!outputs": [
+        "foo",
         "foo.o",
         "bar.o"
     ]

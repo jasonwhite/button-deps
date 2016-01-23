@@ -10,11 +10,11 @@
     ],
     "outputs": [
         "foobar.so",
-        "obj/foo.d.o",
-        "obj/bar.d.o"
+        "obj/foobar.o"
     ],
     "!inputs": [
     ],
     "!outputs": [
+        "obj/bar.o"
     ]
 }

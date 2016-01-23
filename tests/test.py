@@ -25,7 +25,7 @@ class bcolors:
     UNDERLINE = '\033[4m'
     ERROR = FAIL + BOLD + 'Error' + END
 
-def check_positive(results, expected):
+def check_positive(dirname, results, expected):
     """Checks the results with the expected results."""
 
     inputs  = (set(results['inputs']),  set(expected['inputs']))
@@ -51,9 +51,17 @@ def check_positive(results, expected):
         print(textwrap.indent(s, '       '))
         return False
 
+    missing = [p for p in (os.path.join(dirname, p) for p in outputs[0])
+                if not os.path.exists(p)]
+
+    if missing:
+        print(bcolors.ERROR + ': Result outputs missing from file system:')
+        pprint.pprint(missing)
+        return False
+
     return True
 
-def check_negative(results, expected):
+def check_negative(dirname, results, expected):
     """Checks the results with the expected results."""
 
     inputs  = (set(results['inputs']),  set(expected['!inputs']))
@@ -71,16 +79,12 @@ def check_negative(results, expected):
         print(textwrap.indent(s, '       '))
         return False
 
-    return True
+    existing = [p for p in (os.path.join(dirname, p) for p in outputs[1])
+                if os.path.exists(p)]
 
-def check_exist(dirname, outputs):
-    """Checks that the output files exist."""
-    missing = [p for p in (os.path.join(dirname, p) for p in outputs)
-                if not os.path.exists(p)]
-
-    if missing:
-        print(bcolors.ERROR + ': Result outputs missing from file system:')
-        pprint.pprint(missing)
+    if existing:
+        print(bcolors.ERROR + ': Outputs exist on from file system, but should not:')
+        pprint.pprint(existing)
         return False
 
     return True
@@ -121,12 +125,10 @@ def test(bbdeps, path):
     with open('results.json') as f:
         results = json.load(f)
 
-    success = check_positive(results, testcase) and \
-              check_negative(results, testcase)
+    success = check_positive(dirname, results, testcase) and \
+              check_negative(dirname, results, testcase)
 
-    if success:
-        success = check_exist(dirname, results['outputs'])
-    else:
+    if not success:
         print("These dependencies were reported:")
         pprint.pprint(results)
 

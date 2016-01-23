@@ -6,7 +6,7 @@
         "baz.d"
     ],
     "outputs": [
-        "obj/foo.d.o"
+        "obj/foo.o"
     ],
     "!inputs": [
     ],
