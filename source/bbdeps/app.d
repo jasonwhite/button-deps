@@ -15,7 +15,7 @@ module deps.app;
 import std.algorithm : sort;
 
 import deps.logger;
-import deps.tools;
+static import deps.tools;
 
 import io;
 
@@ -73,6 +73,11 @@ else
             return 1;
         }
 
+        auto tool = args.front in tools;
+
+        if (tool is null)
+            return deps.tools.fallback.fallback(args);
+
         DepsLogger logger;
 
         if (json !is null)
@@ -80,17 +85,9 @@ else
         else
             logger = new BrilliantBuildLogger();
 
-        scope (success) logger.finish();
+        scope (success)
+            logger.finish();
 
-        if (auto p = args.front in tools)
-        {
-            return (*p)(logger, args);
-        }
-        else
-        {
-            // TODO: Fallback to using strace.
-            stderr.printfln("Error: Tool '%s' not supported", args.front);
-            return 1;
-        }
+        return (*tool)(logger, args);
     }
 }

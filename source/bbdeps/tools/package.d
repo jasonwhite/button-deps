@@ -5,4 +5,8 @@
  */
 module deps.tools;
 
-public import deps.tools.dmd;
+public
+{
+    import deps.tools.dmd;
+    import deps.tools.fallback;
+}
