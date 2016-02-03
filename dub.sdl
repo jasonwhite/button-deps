@@ -4,6 +4,6 @@ copyright "Copyright © 2016, Jason White"
 license "MIT"
 authors "Jason White"
 
-dependency "io" version=">=0.0.1"
+dependency "io" version=">=0.0.3"
 
 targetType "executable"

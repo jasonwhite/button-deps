@@ -94,7 +94,7 @@ class JSONLogger : DepsLogger
 
     void finish()
     {
-        file.write(root.toPrettyString());
+        file.writeExactly(root.toPrettyString());
     }
 
     void addInput(string path)
@@ -147,8 +147,8 @@ class BrilliantBuildLogger : DepsLogger
 
         synchronized
         {
-            inputs.write((cast(void*)&dep)[0 .. Dependency.sizeof]);
-            inputs.write(path);
+            inputs.writeExactly(dep);
+            inputs.writeExactly(path);
         }
     }
 
@@ -163,8 +163,8 @@ class BrilliantBuildLogger : DepsLogger
 
         synchronized
         {
-            outputs.write((cast(void*)&dep)[0 .. Dependency.sizeof]);
-            outputs.write(path);
+            outputs.writeExactly(dep);
+            outputs.writeExactly(path);
         }
     }
 
