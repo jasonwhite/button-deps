@@ -73,11 +73,6 @@ else
             return 1;
         }
 
-        auto tool = args.front in tools;
-
-        if (tool is null)
-            return deps.tools.fallback.fallback(args);
-
         DepsLogger logger;
 
         if (json !is null)
@@ -87,6 +82,11 @@ else
 
         scope (success)
             logger.finish();
+
+        auto tool = args.front in tools;
+
+        if (tool is null)
+            return deps.tools.fallback.fallback(logger, args);
 
         return (*tool)(logger, args);
     }
