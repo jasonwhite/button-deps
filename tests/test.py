@@ -114,11 +114,9 @@ def test(bbdeps, path):
 
     args = [bbdeps, '--json', os.path.abspath('results.json'), '--'] + testcase['command']
 
-    output = None
     try:
-        output = subprocess.check_output(args, cwd=dirname)
+        subprocess.check_call(args, cwd=dirname)
     except subprocess.CalledProcessError as e:
-        print(e.output)
         return False
 
     results = None
