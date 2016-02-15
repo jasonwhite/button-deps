@@ -140,7 +140,7 @@ class BrilliantBuildLogger : DepsLogger
     {
         import std.conv : to;
 
-        if (!inputs.isOpen)
+        if (!inputs.refCountedStore.isInitialized || !inputs.isOpen)
             return;
 
         immutable Dependency dep = {length: path.length.to!uint};
@@ -156,7 +156,7 @@ class BrilliantBuildLogger : DepsLogger
     {
         import std.conv : to;
 
-        if (!outputs.isOpen)
+        if (!outputs.refCountedStore.isInitialized || !outputs.isOpen)
             return;
 
         immutable Dependency dep = {length: path.length.to!uint};
