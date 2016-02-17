@@ -46,29 +46,41 @@ private struct Strace
 
     private
     {
+        import std.container.rbtree;
+
         DepsLogger logger;
 
         // Current working directories of each tracked process.
         string[int] processes;
+
+        RedBlackTree!string inputs, outputs;
     }
 
     this(DepsLogger logger)
     {
         this.logger = logger;
+
+        inputs = redBlackTree!string();
+        outputs = redBlackTree!string();
     }
 
     ~this()
     {
+        foreach (f; inputs)
+            logger.addInput(f);
+
+        foreach (f; outputs)
+            logger.addOutput(f);
     }
 
     string filePath(int pid, const(char)[] path)
     {
-        import std.path : buildPath;
+        import std.path : buildNormalizedPath;
 
         if (auto p = pid in processes)
-            return buildPath(*p, path);
+            return buildNormalizedPath(*p, path);
 
-        return path.idup;
+        return buildNormalizedPath(path);
     }
 
     void parse(File f)
@@ -146,18 +158,18 @@ private struct Strace
         if (ignorePath(path))
             return;
 
-        foreach (mode; splitter(flags, '|'))
+        foreach (flag; splitter(flags, '|'))
         {
-            if (mode == "O_WRONLY" || mode == "O_RDWR")
+            if (flag == "O_WRONLY" || flag == "O_RDWR")
             {
-                // Opened in write mode. It's an input.
-                logger.addOutput(filePath(pid, path));
+                // Opened in write mode. It's an output.
+                outputs.insert(filePath(pid, path));
                 break;
             }
-            else if (mode == "O_RDONLY")
+            else if (flag == "O_RDONLY")
             {
                 // Opened in read-only mode. It's an input.
-                logger.addInput(filePath(pid, path));
+                inputs.insert(filePath(pid, path));
                 break;
             }
         }
@@ -168,7 +180,7 @@ private struct Strace
         if (ignorePath(path))
             return;
 
-        logger.addOutput(filePath(pid, path));
+        outputs.insert(filePath(pid, path));
     }
 
     void rename(int pid, const(char)[] from, const(char)[] to)
@@ -176,12 +188,13 @@ private struct Strace
         if (ignorePath(to))
             return;
 
-        logger.addOutput(filePath(pid, to));
+        outputs.removeKey(filePath(pid, from));
+        outputs.insert(filePath(pid, to));
     }
 
     void mkdir(int pid, const(char)[] dir)
     {
-        logger.addOutput(filePath(pid, dir));
+        outputs.insert(filePath(pid, dir));
     }
 
     void chdir(int pid, const(char)[] path)
@@ -209,7 +222,7 @@ int fallback(DepsLogger logger, string[] args)
         "-o", traceLog,
 
         // Only trace the sys calls we are interested in
-        "-e", "trace=open,rename,mkdir,chdir",
+        "-e", "trace=open,creat,rename,mkdir,chdir",
         ] ~ args;
 
     try
