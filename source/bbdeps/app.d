@@ -30,6 +30,9 @@ shared static this()
     tools = [
         "dmd": &deps.tools.dmd.dmd,
         "ar": &deps.tools.fallthrough.fallthrough,
+        "bb": &deps.tools.fallthrough.fallthrough,
+        "bbdeps": &deps.tools.fallthrough.fallthrough,
+        "bblua": &deps.tools.fallthrough.fallthrough,
     ];
 }
 
