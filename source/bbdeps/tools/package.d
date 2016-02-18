@@ -9,4 +9,5 @@ public
 {
     import deps.tools.dmd;
     import deps.tools.fallback;
+    import deps.tools.fallthrough;
 }
