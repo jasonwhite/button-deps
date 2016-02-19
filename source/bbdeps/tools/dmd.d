@@ -12,7 +12,7 @@ import deps.logger;
 
 import io.file;
 
-struct Options
+private struct Options
 {
     // Flags
     bool compileFlag; // -c
@@ -166,7 +166,7 @@ struct Options
 /**
  * Parses DMD arguments.
  */
-Options parseArgs(const(string)[] args) pure
+private Options parseArgs(const(string)[] args) pure
 {
     import std.algorithm.searching : startsWith;
     import std.exception : enforce;
@@ -244,7 +244,7 @@ Options parseArgs(const(string)[] args) pure
 /**
  * Parses the given file for dependencies. Returns a sorted list of inputs.
  */
-immutable(string)[] parseInputs(File f)
+private immutable(string)[] parseInputs(File f)
 {
     import io.text : byLine;
     import std.regex : regex, matchAll;

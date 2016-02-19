@@ -15,7 +15,7 @@ module deps.app;
 import std.algorithm : sort;
 
 import deps.logger;
-static import deps.tools;
+import deps.tools;
 
 import io;
 
@@ -29,10 +29,10 @@ shared static this()
      */
     tools = [
         "dmd": &deps.tools.dmd.dmd,
-        "ar": &deps.tools.fallthrough.fallthrough,
-        "bb": &deps.tools.fallthrough.fallthrough,
-        "bbdeps": &deps.tools.fallthrough.fallthrough,
-        "bblua": &deps.tools.fallthrough.fallthrough,
+        "ar": &passthrough,
+        "bb": &passthrough,
+        "bbdeps": &passthrough,
+        "bblua": &passthrough,
     ];
 }
 
@@ -77,6 +77,12 @@ else
             return 1;
         }
 
+        auto tool = args.front in tools;
+
+        // Early exit to avoid constructing the logger.
+        if (tool !is null && *tool == &passthrough)
+            return passthrough(null, args);
+
         DepsLogger logger;
 
         if (json !is null)
@@ -87,10 +93,8 @@ else
         scope (success)
             logger.finish();
 
-        auto tool = args.front in tools;
-
         if (tool is null)
-            return deps.tools.fallback.fallback(logger, args);
+            return trace(logger, args);
 
         return (*tool)(logger, args);
     }

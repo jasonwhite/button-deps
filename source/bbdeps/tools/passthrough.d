@@ -8,11 +8,11 @@
  * is useful for tools where we don't want to detect dependencies (e.g., the
  * build system itself).
  */
-module deps.tools.fallthrough;
+module deps.tools.passthrough;
 
 import deps.logger;
 
-int fallthrough(DepsLogger logger, string[] args)
+int passthrough(DepsLogger logger, string[] args)
 {
     version (Posix)
     {

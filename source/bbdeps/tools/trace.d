@@ -5,9 +5,10 @@
  *
  * Description:
  * The fallback for what to do when no other tool can handle dependency
- * detection.
+ * detection. This is much slower than handling dependency detection in an
+ * ad-hoc manner and should be used as a last resort.
  */
-module deps.tools.fallback;
+module deps.tools.trace;
 
 import io.file;
 import deps.logger;
@@ -15,7 +16,7 @@ import deps.logger;
 version (Posix)
 {
 
-private struct Strace
+private struct Trace
 {
     /**
      * Paths that start with these fragments are ignored.
@@ -203,7 +204,7 @@ private struct Strace
     }
 }
 
-int fallback(DepsLogger logger, string[] args)
+int trace(DepsLogger logger, string[] args)
 {
     import std.string : toStringz;
     import std.file : remove;
@@ -237,7 +238,7 @@ int fallback(DepsLogger logger, string[] args)
         }
 
         // Parse the trace log to determine dependencies
-        auto strace = Strace(logger);
+        auto strace = Trace(logger);
         strace.parse(File(traceLog));
     }
     catch (ProcessException e)
