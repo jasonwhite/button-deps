@@ -193,8 +193,10 @@ private struct Trace
         if (ignorePath(to))
             return;
 
+        auto output = filePath(pid, to);
         outputs.removeKey(filePath(pid, from));
-        outputs.insert(filePath(pid, to));
+        inputs.removeKey(output);
+        outputs.insert(output);
     }
 
     void mkdir(int pid, const(char)[] dir)

@@ -28,7 +28,6 @@ shared static this()
      * List of tools.
      */
     tools = [
-        "ar":     &passthrough,
         "bb":     &passthrough,
         "bbdeps": &passthrough,
         "bblua":  &passthrough,
