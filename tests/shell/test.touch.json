@@ -1,0 +1,14 @@
+{
+    "command": [
+        "touch", "touchtest"
+    ],
+    "inputs": [
+    ],
+    "outputs": [
+        "touchtest"
+    ],
+    "!inputs": [
+    ],
+    "!outputs": [
+    ]
+}

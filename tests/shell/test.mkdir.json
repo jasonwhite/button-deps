@@ -1,0 +1,14 @@
+{
+    "command": [
+        "mkdir", "_test_mkdir"
+    ],
+    "inputs": [
+    ],
+    "outputs": [
+        "_test_mkdir"
+    ],
+    "!inputs": [
+    ],
+    "!outputs": [
+    ]
+}

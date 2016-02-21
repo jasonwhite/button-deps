@@ -1,0 +1,23 @@
+{
+    "setup": [
+        ["sh", "-c", "echo Hello world! > _test_src"]
+    ],
+    "command": [
+        "cp", "_test_src", "_test_dest"
+    ],
+    "teardown": [
+        ["rm", "_test_src"]
+    ],
+    "inputs": [
+        "_test_src"
+    ],
+    "outputs": [
+        "_test_dest"
+    ],
+    "!inputs": [
+        "_test_dest"
+    ],
+    "!outputs": [
+        "_test_src"
+    ]
+}

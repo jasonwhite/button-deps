@@ -93,9 +93,23 @@ def cleanup(dirname, outputs):
     """Deletes the expected outputs."""
     for output in outputs:
         try:
-            os.remove(os.path.join(dirname, output))
+            path = os.path.join(dirname, output)
+            if os.path.isfile(path):
+                os.remove(path)
+            elif os.path.isdir(path):
+                os.removedirs(path)
         except OSError:
             pass
+
+def setup(testcase, dirname):
+    if 'setup' in testcase:
+        for step in testcase['setup']:
+            subprocess.check_call(step, cwd=dirname)
+
+def teardown(testcase, dirname):
+    if 'teardown' in testcase:
+        for step in testcase['teardown']:
+            subprocess.check_call(step, cwd=dirname)
 
 def test(bbdeps, path):
     """Runs a single test.
@@ -112,12 +126,17 @@ def test(bbdeps, path):
     with open(path) as f:
         testcase = json.load(f)
 
+    setup(testcase, dirname)
+
     args = [bbdeps, '--json', os.path.abspath('results.json'), '--'] + testcase['command']
 
     try:
         subprocess.check_call(args, cwd=dirname)
     except subprocess.CalledProcessError as e:
+        teardown(testcase, dirname)
         return False
+
+    teardown(testcase, dirname)
 
     results = None
     with open('results.json') as f:
