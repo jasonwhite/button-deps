@@ -45,15 +45,17 @@ tracking.
 For example, suppose we have a shell script `test.sh`:
 
 ```bash
-echo "Hello world!" > foo
-cp foo bar
+cat foo
+echo "Hello world!" > bar
+cp bar baz
 ```
 
 If we run this shell script, like so:
 
     $ bbdeps bash test.sh
 
-`foo` and `bar` will be reported as inputs and outputs, respectively.
+`test.sh` and `foo` will be reported as inputs, while `bar` and `baz` will be
+reported as outputs.
 
 ## Building it
 
