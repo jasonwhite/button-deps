@@ -166,7 +166,9 @@ private struct Trace
             if (flag == "O_WRONLY" || flag == "O_RDWR")
             {
                 // Opened in write mode. It's an output.
-                outputs.insert(filePath(pid, path));
+                auto f = filePath(pid, path);
+                inputs.removeKey(f);
+                outputs.insert(f);
                 break;
             }
             else if (flag == "O_RDONLY")
