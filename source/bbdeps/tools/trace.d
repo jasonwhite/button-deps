@@ -165,7 +165,8 @@ private struct Trace
         {
             if (flag == "O_WRONLY" || flag == "O_RDWR")
             {
-                // Opened in write mode. It's an output.
+                // Opened in write mode. It's an output even if it was read
+                // before.
                 auto f = filePath(pid, path);
                 inputs.removeKey(f);
                 outputs.insert(f);
@@ -173,8 +174,13 @@ private struct Trace
             }
             else if (flag == "O_RDONLY")
             {
-                // Opened in read-only mode. It's an input.
-                inputs.insert(filePath(pid, path));
+                // Opened in read-only mode. It's an input unless it's already
+                // an output. Consider the scenario of writing a new file and
+                // then reading it back in. In such cases, the file should only
+                // be considered an output.
+                auto f = filePath(pid, path);
+                if (f !in outputs)
+                    inputs.insert(f);
                 break;
             }
         }

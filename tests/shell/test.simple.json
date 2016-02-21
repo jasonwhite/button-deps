@@ -1,0 +1,20 @@
+{
+    "command": [
+        "./test.simple.sh"
+    ],
+    "inputs": [
+        "test.simple.sh",
+        "_test_input1"
+    ],
+    "outputs": [
+        "_test_output1",
+        "_test_output2"
+    ],
+    "!inputs": [
+        "_test_output1",
+        "_test_output2"
+    ],
+    "!outputs": [
+        "_test_input1"
+    ]
+}
