@@ -28,11 +28,11 @@ shared static this()
      * List of tools.
      */
     tools = [
-        "dmd": &deps.tools.dmd.dmd,
-        "ar": &passthrough,
-        "bb": &passthrough,
+        "ar":     &passthrough,
+        "bb":     &passthrough,
         "bbdeps": &passthrough,
-        "bblua": &passthrough,
+        "bblua":  &passthrough,
+        "dmd":    &deps.tools.dmd.dmd,
     ];
 }
 

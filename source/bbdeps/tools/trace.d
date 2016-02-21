@@ -7,6 +7,8 @@
  * The fallback for what to do when no other tool can handle dependency
  * detection. This is much slower than handling dependency detection in an
  * ad-hoc manner and should be used as a last resort.
+ *
+ * TODO: Use ptrace directly instead of parsing the output of strace.
  */
 module deps.tools.trace;
 
@@ -243,8 +245,10 @@ int trace(DepsLogger logger, string[] args)
     }
     catch (ProcessException e)
     {
-        // We don't have strace. Fallback to just running without it.
-        return wait(spawnProcess(args));
+        import deps.tools.passthrough;
+
+        // No strace. Just fallback to running the process normally.
+        return passthrough(null, args);
     }
 
     return 0;
