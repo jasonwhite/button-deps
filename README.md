@@ -5,11 +5,14 @@
 
 [Brilliant Build]: https://github.com/jasonwhite/brilliant-build
 
-A tool that wraps commands in order to figure out file dependencies in an ad-hoc
+A tool that wraps commands in order to figure out file dependencies in an ad hoc
 manner. If running under [Brilliant Build][], dependencies are reported to the
-parent build system.
+parent build system. Dependencies can also be output in JSON format for
+integration with other tools.
 
-## Example
+## Examples
+
+### D
 
 Suppose we have a D source file `foo.d`:
 ```d
@@ -30,7 +33,27 @@ In order to compile `foo.d`, we run:
 
 Here, `bbdeps` will use some tricks to figure out the transitive closure of
 dependencies that `dmd -c foo.d` has. In this case, `bbdeps` will report
-`foo.d`, `bar.d`, and `baz.d` as dependencies to Brilliant Build.
+`foo.d`, `bar.d`, and `baz.d` as dependencies.
+
+### General
+
+For tools that are not yet fully supported or cannot be supported, `strace` is
+used to determine dependencies by analysing how files are opened. While slower
+than ad hoc support for other tools, `strace` provides accurate dependency
+tracking.
+
+For example, suppose we have a shell script `test.sh`:
+
+```bash
+echo "Hello world!" > foo
+cp foo bar
+```
+
+If we run this shell script, like so:
+
+    $ bbdeps bash test.sh
+
+`foo` and `bar` will be reported as inputs and outputs, respectively.
 
 ## Building it
 
