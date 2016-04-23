@@ -31,7 +31,7 @@ shared static this()
         "bb":     &passthrough,
         "bbdeps": &passthrough,
         "bblua":  &passthrough,
-        "dmd":    &deps.tools.dmd.dmd,
+        "dmd":    &dmd,
     ];
 }
 
