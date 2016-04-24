@@ -10,6 +10,7 @@ module deps.logger;
 
 import std.json;
 
+import io.stream : writeExactly;
 import io.file.stream : File, FileFlags;
 
 /**
