@@ -30,7 +30,7 @@ int passthrough(DepsLogger logger, string[] args)
         execvp(argv[0], argv.ptr);
 
         // execvp does not exit unless an error occurs.
-        fprintf(stderr, "bbdeps: Failed executing process '%s' (%s)\n",
+        fprintf(stderr, "button-deps: Failed executing process '%s' (%s)\n",
                 argv[0], strerror(errno));
 
         return 1;

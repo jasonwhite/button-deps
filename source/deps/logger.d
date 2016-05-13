@@ -116,9 +116,9 @@ class JSONLogger : DepsLogger
 }
 
 /**
- * Outputs dependencies Brilliant Build.
+ * Outputs dependencies for Button.
  */
-class BrilliantBuildLogger : DepsLogger
+class ButtonLogger : DepsLogger
 {
     private
     {
@@ -130,10 +130,10 @@ class BrilliantBuildLogger : DepsLogger
         import std.process : environment;
         import std.conv : to;
 
-        if (auto inputs = environment.get("BB_INPUTS"))
+        if (auto inputs = environment.get("BUTTON_INPUTS"))
             this.inputs = File(inputs.to!int);
 
-        if (auto outputs = environment.get("BB_OUTPUTS"))
+        if (auto outputs = environment.get("BUTTON_OUTPUTS"))
             this.outputs = File(outputs.to!int);
     }
 

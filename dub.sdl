@@ -1,4 +1,4 @@
-name "bbdeps"
+name "button-deps"
 description "Wraps commands to provide dependency information."
 copyright "Copyright © 2016, Jason White"
 license "MIT"

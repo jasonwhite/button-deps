@@ -111,24 +111,24 @@ def teardown(testcase, dirname):
         for step in testcase['teardown']:
             subprocess.check_call(step, cwd=dirname)
 
-def test(bbdeps, path):
+def test(bin_path, test_path):
     """Runs a single test.
 
     Compares the results with the expected results.
     """
-    dirname = os.path.dirname(path)
+    dirname = os.path.dirname(test_path)
 
-    name, _ = os.path.splitext(path)
+    name, _ = os.path.splitext(test_path)
 
     print(bcolors.HEADER + ":: Test '{}'...".format(name) + bcolors.END)
 
     testcase = None
-    with open(path) as f:
+    with open(test_path) as f:
         testcase = json.load(f)
 
     setup(testcase, dirname)
 
-    args = [bbdeps, '--json', os.path.abspath('results.json'), '--'] + testcase['command']
+    args = [bin_path, '--json', os.path.abspath('results.json'), '--'] + testcase['command']
 
     try:
         subprocess.check_call(args, cwd=dirname)
@@ -165,13 +165,13 @@ if __name__ == '__main__':
 
     tests = find_tests()
 
-    bbdeps = os.path.abspath('../bbdeps')
+    bin_path = os.path.abspath('../button-deps')
 
     success = 0
     total = 0
     for t in tests:
         total += 1
-        if test(bbdeps, t):
+        if test(bin_path, t):
             success += 1
         else:
             print(bcolors.FAIL + bcolors.BOLD + ' - TEST FAILED' + bcolors.END)

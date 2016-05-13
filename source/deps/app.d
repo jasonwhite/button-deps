@@ -28,10 +28,10 @@ shared static this()
      * List of tools.
      */
     tools = [
-        "bb":     &passthrough,
-        "bbdeps": &passthrough,
-        "bblua":  &passthrough,
-        "dmd":    &dmd,
+        "button":      &passthrough,
+        "button-deps": &passthrough,
+        "button-lua":  &passthrough,
+        "dmd":         &dmd,
     ];
 }
 
@@ -42,7 +42,7 @@ version (unittest)
 }
 else
 {
-    immutable usage = "Usage: bbdeps [--json FILE] -- program [arg...]";
+    immutable usage = "Usage: button-deps [--json FILE] -- program [arg...]";
 
     int main(string[] args)
     {
@@ -87,7 +87,7 @@ else
         if (json !is null)
             logger = new JSONLogger(File(json, FileFlags.writeEmpty));
         else
-            logger = new BrilliantBuildLogger();
+            logger = new ButtonLogger();
 
         scope (success)
             logger.finish();

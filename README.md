@@ -1,12 +1,12 @@
-[buildbadge]: https://travis-ci.org/jasonwhite/bbdeps.svg?branch=master
-[buildstatus]: https://travis-ci.org/jasonwhite/bbdeps
+[buildbadge]: https://travis-ci.org/jasonwhite/button-deps.svg?branch=master
+[buildstatus]: https://travis-ci.org/jasonwhite/button-deps
 
 # Implicit Dependency Detection [![Build Status][buildbadge]][buildstatus]
 
-[Brilliant Build]: https://github.com/jasonwhite/brilliant-build
+[Button]: https://github.com/jasonwhite/button
 
 A tool that wraps commands in order to figure out file dependencies in an ad hoc
-manner. If running under [Brilliant Build][], dependencies are reported to the
+manner. If running under [Button][], dependencies are reported to the
 parent build system. Dependencies can also be output in JSON format for
 integration with other tools.
 
@@ -29,10 +29,10 @@ Note that `foo.d` imports `bar.d` and `bar.d` imports `baz.d`.
 
 In order to compile `foo.d`, we run:
 
-    bbdeps dmd -c foo.d
+    button-deps dmd -c foo.d
 
-Here, `bbdeps` will use some tricks to figure out the transitive closure of
-dependencies that `dmd -c foo.d` has. In this case, `bbdeps` will report
+Here, `button-deps` will use some tricks to figure out the transitive closure of
+dependencies that `dmd -c foo.d` has. In this case, `button-deps` will report
 `foo.d`, `bar.d`, and `baz.d` as dependencies.
 
 ### General
@@ -52,7 +52,7 @@ cp bar baz
 
 If we run this shell script, like so:
 
-    $ bbdeps bash test.sh
+    $ button-deps bash test.sh
 
 `test.sh` and `foo` will be reported as inputs, while `bar` and `baz` will be
 reported as outputs.
@@ -67,7 +67,7 @@ reported as outputs.
  2. Get the source:
 
     ```bash
-    git clone https://github.com/jasonwhite/bbdeps.git
+    git clone https://github.com/jasonwhite/button-deps.git
     ```
 
  3. Build it:
