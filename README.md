@@ -3,6 +3,9 @@
 
 # Implicit Dependency Detection [![Build Status][buildbadge]][buildstatus]
 
+**This tool has been merged into Button and is now unnecessary. The only thing
+left to do is bring the tests over.**
+
 [Button]: https://github.com/jasonwhite/button
 
 A tool that wraps commands in order to figure out file dependencies in an ad hoc
